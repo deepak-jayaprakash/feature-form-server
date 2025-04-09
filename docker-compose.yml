@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  featureform:
+    image: featureformcom/featureform:latest
+    ports:
+      - "7878:7878"
+    environment:
+      - FEATUREFORM_HOST=0.0.0.0
+      - FEATUREFORM_PORT=7878
+      - FEATUREFORM_METADATA_STORE_TYPE=local
+      - FEATUREFORM_METADATA_STORE_PATH=/featureform/metadata
+      - FEATUREFORM_INFERENCE_STORE_TYPE=local
+      - FEATUREFORM_INFERENCE_STORE_PATH=/featureform/inference
+    volumes:
+      - featureform_metadata:/featureform/metadata
+      - featureform_inference:/featureform/inference
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=featureform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  featureform_metadata:
+  featureform_inference:
+  redis_data:
+  postgres_data: 
