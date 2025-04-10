@@ -1,4 +1,4 @@
-featureform>=1.12.0
+featureform>=1.15.7
 fastapi>=0.68.0
 uvicorn>=0.15.0
 python-dotenv>=0.19.0

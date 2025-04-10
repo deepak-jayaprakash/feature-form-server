@@ -49,10 +49,10 @@ def main():
 
         print("\nDefining SQL transformation...")
         @postgres.sql_transformation(inputs=[transactions])
-        def average_user_transaction(tr):
+        def max_user_transaction(tr):
             return (
-                "SELECT CustomerID as user_id, avg(TransactionAmount) "
-                "as avg_transaction_amt from {{tr}} GROUP BY user_id"
+                "SELECT CustomerID as user_id, max(TransactionAmount) "
+                "as max_transaction_amt from {{tr}} GROUP BY user_id"
             )
         print("SQL transformation defined successfully")
         client.apply()
@@ -61,33 +61,31 @@ def main():
         print("\nDefining User entity and features...")
         @ff.entity
         class User:
-            avg_transactions = ff.Feature(
-                average_user_transaction[
-                    ["user_id", "avg_transaction_amt"]
-                ],
-                variant="quickstart1",
+            sum_transactions = ff.Feature(
+                max_user_transaction[
+                    ["user_id", "max_transaction_amt"]
+                # ],
+                # variant="quickstart3",
                 type=ff.Float32,
                 inference_store=redis,
             )
 
-            fraudulent = ff.Label(
+            fraudulent2 = ff.Label(
                 transactions[["customerid", "isfraud"]], 
-                variant="quickstart1", 
+                # variant="quickstart3", 
                 type=ff.Bool,
             )
-        client.apply()
+        client.list_sources
         print("User entity and features applied")
 
-        print("\nRegistering training set...")
-        ff.register_training_set(
-            name="fraud_training",
-            label=User.fraudulent,
-            features=[User.avg_transactions],
-            variant="quickstart1",
-        )
-        print("Training set registered successfully")
-        client.apply()
-        print("Training set applied")
+        # print("\nRegistering training set...")
+        # ff.register_training_set(
+        #     name="fraud_training",
+        #     label=User.fraudulent2,
+        #     features=[User.sum_transactions],
+        #     variant="quickstart3",
+        # )
+        # client.apply()
 
         print("\nAll steps completed successfully!")
 
